@@ -1,0 +1,32 @@
+{
+  "name": "vtex-powertools",
+  "version": "1.0.0",
+  "description": "CLI tool to syncronize files to VTEX CMS",
+  "main": "libs/vtex.js",
+  "bin": "bin/vtex.js",
+  "scripts": {
+    "test": "mocha --compilers coffee:coffee-script"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vtex/power-tools"
+  },
+  "keywords": [
+    "CLI",
+    "vtex",
+    "powertools"
+  ],
+  "author": "VTEX Company",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vtex/power-tools/issues"
+  },
+  "homepage": "https://github.com/vtex/power-tools",
+  "dependencies": {
+    "commander": "~2.1.0",
+    "prompt": "~0.2.12",
+    "q": "~0.9.7",
+    "request": "~2.33.0"
+  },
+  "preferGlobal": true
+}
