@@ -1,4 +1,5 @@
 pkg = require '../package.json'
+globule = require 'globule'
 request = require 'request'
 auth = require './auth'
 paths = require 'path'
@@ -37,6 +38,17 @@ onChange = (changedFiles) ->
 
 	return deferred.promise
 
+syncFilesToS3 = (root) ->
+	deferred = Q.defer()
+	for file in globule.find(root)
+		if fs.lstatSync(file).isFile()
+			console.log "sync ", file
+			changedFiles[file] = 'created'
+
+	onChange(changedFiles)
+	deferred.resolve()
+	return deferred.promise
+
 exports.createRequestMessage = (changedFiles) ->
 	messages = []
 	for path in Object.keys changedFiles
@@ -69,7 +81,13 @@ exports.sync = ->
 	cleanBucketPromise = onChange(changedFiles)
 
 	cleanBucketPromise.then (onChangeReturn) ->
-		console.log "cleanBucketPromise was processed!"
+		root = pkg.parameters.root
+		syncPromise = syncFilesToS3 root
+		syncPromise.then (syncReturn) ->
+			console.log "syncPromise was processed!"
+
+		.fail (reason) ->
+			console.log "Something went wrong. ", reason
 
 	.fail (reason) ->
 		msg = "Something went wrong. " + reason

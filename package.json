@@ -27,7 +27,12 @@
     "commander": "~2.1.0",
     "prompt": "~0.2.12",
     "q": "~0.9.7",
-    "request": "~2.33.0"
+    "request": "~2.33.0",
+    "mime": "~1.2.11",
+    "globule": "~0.2.0"
   },
+  "parameters":{
+      "root": "bin/**"
+    },
   "preferGlobal": true
 }
