@@ -1,6 +1,7 @@
 pkg = require '../package.json'
 globule = require 'globule'
 request = require 'request'
+watch = require 'watch'
 auth = require './auth'
 paths = require 'path'
 mime = require 'mime'
@@ -49,6 +50,29 @@ syncFilesToS3 = (root) ->
 	deferred.resolve()
 	return deferred.promise
 
+watchFiles = (path) ->
+	watch.createMonitor path, (monitor) ->
+		monitor.on 'created', (filePath) ->
+			console.log "created ", filePath
+			addCreatedFile filePath, 'created'
+			onChange changedFiles
+
+		monitor.on 'removed', (filePath) ->
+			console.log "removed ", filePath
+
+		monitor.on 'changed', (filePath) ->
+			console.log "changed", filePath
+
+addCreatedFile = (filePath, action) ->
+	if fs.lstatSync(filePath).isFile()
+		changedFiles[filePath] = action
+
+	if fs.lstatSync(filePath).isDirectory()
+		for file in fs.readdirSync filePath
+			fileName = filePath + "\\" + file
+			if fs.lstatSync(fileName).isFile()
+				changedFiles[fileName] = action
+
 exports.createRequestMessage = (changedFiles) ->
 	messages = []
 	for path in Object.keys changedFiles
@@ -83,8 +107,11 @@ exports.sync = ->
 	cleanBucketPromise.then (onChangeReturn) ->
 		root = pkg.parameters.root
 		syncPromise = syncFilesToS3 root
-		syncPromise.then (syncReturn) ->
-			console.log "syncPromise was processed!"
+
+		syncPromise.then (syncReturn, root) ->
+			root = paths.dirname(pkg.parameters.root)
+			console.log "watching files...".green
+			watchFiles(root)
 
 		.fail (reason) ->
 			console.log "Something went wrong. ", reason
