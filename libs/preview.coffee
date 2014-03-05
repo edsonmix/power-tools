@@ -62,6 +62,8 @@ watchFiles = (path) ->
 
 		monitor.on 'changed', (filePath) ->
 			console.log "changed", filePath
+			changedFiles[filePath] = 'changed'
+			onChange changedFiles
 
 addCreatedFile = (filePath, action) ->
 	if fs.lstatSync(filePath).isFile()
