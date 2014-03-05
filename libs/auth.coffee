@@ -1,15 +1,15 @@
 qstring = require 'querystring'
 request = require 'request'
 prompt = require 'prompt'
+paths = require 'path'
 fs = require 'fs'
 Q = require 'q'
 
-authUserAndPassWithVtexId = ->
+authUserAndPassWithVtexId = (credentials) ->
 	deferred = Q.defer()
-	credentialsPromise = getCredentials()
 	tokenPromise = getToken()
 
-	authPromise = Q.all([credentialsPromise, tokenPromise]).spread (credentials, token) ->
+	authPromise = Q.all([credentials, tokenPromise]).spread (credentials, token) ->
 		authUserWith(credentials.login, credentials.password, token)
 
 	authPromise.then (success) ->
@@ -39,9 +39,11 @@ getToken = ->
 
 	return deferred.promise
 
-getCredentials = ->
+getLoginAndPassword = ->
 	deferred = Q.defer()
 	schema = properties:
+		account:
+			required: true
 		login:
 			required: true
 		password:
@@ -53,7 +55,7 @@ getCredentials = ->
 	prompt.start()
 	console.log "Enter your VTEX credentials\n"
 	prompt.get schema, (err, result) ->
-		return deferred.reject(result) unless result.login and result.password
+		return deferred.reject(result) unless result.login and result.password and result.account
 		return deferred.resolve(result)
 
 	return deferred.promise
@@ -78,17 +80,41 @@ authUserWith = (login, password, token) ->
 
 	return deferred.promise
 
+getCredentialsPath = ->
+	dir = paths.resolve module.filename, '../../'
+	credentials = paths.join(dir, 'credentials')
+	credentials if test '-e', credentials
+
+	mkdir '-p', credentials
+	return credentials
+
+exports.getCredentials = ->
+	path = paths.join(getCredentialsPath(), 'data.json')
+	if !fs.existsSync(path)
+		throw new Error('Authentication failed. Call \'vtex login\'')
+
+	content = fs.readFileSync(path, 'utf8')
+	return JSON.parse content
+
 exports.userAndPassword = ->
-	authPromise = authUserAndPassWithVtexId()
-	authPromise.then (response) ->
-		msg = "Authentication: \'#{response.authStatus}\'"
-		try
-			throw new Error(msg) if response.authStatus isnt 'Success'
+	loginAndPassPromise = getLoginAndPassword()
 
-			fs.writeFile 'credentials.json', JSON.stringify(response, null, 4)
-			console.log msg
-		catch e
-			console.log e.message
+	loginAndPassPromise.then (credentials) ->
+		authUserAndPassPromise = authUserAndPassWithVtexId(credentials)
+		authPromise = Q.all([authUserAndPassPromise, credentials]).spread (response, credentials) ->
+			msg = "Authentication: \'#{response.authStatus}\'"
+			try
+				throw new Error(msg) if response.authStatus isnt 'Success'
 
-	.fail (reason) ->
-		new Error("Something went wrong. " + reason.authStatus) if reason isnt 'Success'
+				response.userId = credentials.login
+				response.accountId = credentials.account
+
+				path = paths.join(getCredentialsPath(), 'data.json')
+				fs.writeFile path, JSON.stringify(response, null, 4)
+
+				console.log msg
+			catch e
+				console.log e.message
+
+		.fail (reason) ->
+			new Error("Something went wrong. " + reason.authStatus) if reason isnt 'Success'
