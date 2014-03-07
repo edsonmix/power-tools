@@ -1,5 +1,5 @@
 program = require 'commander'
-pkg = require '../package.json'
+pkg = require.main.require '../package'
 PowerTool = require '../libs/powertool'
 
 program.version pkg.version
