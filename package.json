@@ -1,10 +1,11 @@
 {
   "name": "vtex-powertools",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "CLI tool to syncronize files to VTEX CMS",
   "main": "libs/vtex.js",
   "bin": "bin/vtex.js",
   "scripts": {
+	"prepublish": "coffee -c --no-header libs/ bin/",
     "test": "mocha --compilers coffee:coffee-script"
   },
   "repository": {
