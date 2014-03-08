@@ -5,7 +5,7 @@ PowerTool = require '../libs/powertool'
 program.version pkg.version
 	.usage 'COMMAND [options]'
 	.option '-l, login', 'authenticate user'
-	.option '-s, sync', 'syncronize application'
+	.option '-p, preview', 'preview application'
 	.parse process.argv
 
 try

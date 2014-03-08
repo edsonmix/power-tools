@@ -5,6 +5,6 @@ module.exports = (opts) ->
   switch
     when opts.sync then console.log 'sync!'
     when opts.login then auth.userAndPassword()
-
-    else 'command not found. Use vtex --help'
+    when opts.args.length is 0 then opts.help()
+    else console.log 'command not found. Use vtex --help'.green
   this
