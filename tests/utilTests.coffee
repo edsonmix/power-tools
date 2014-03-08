@@ -52,3 +52,18 @@ describe "when getOptionsFile ", ->
 
 		#Assert
 		assert.throws(err, Error, "File \'_powertool.yaml\' not found.")
+
+	it "should return default options in the empty fields", ->
+		#Arrange
+		yml =
+		"""
+		root: root/**
+		"""
+		aux.createFile '_powertool.yml', yml
+
+		#Act
+		config = util.getOptionsFile()
+
+		#Assert
+		assert.equal 'root/**', config.root
+		assert.equal 0, config.ignore.length

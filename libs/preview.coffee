@@ -2,6 +2,7 @@ pkg = require '../package.json'
 globule = require 'globule'
 request = require 'request'
 watch = require 'watch'
+util = require './util'
 auth = require './auth'
 paths = require 'path'
 mime = require 'mime'
@@ -59,6 +60,7 @@ watchFiles = (path) ->
 
 		monitor.on 'removed', (filePath) ->
 			console.log "removed ", filePath
+			addRemovedFile filePath, 'removed'
 
 		monitor.on 'changed', (filePath) ->
 			console.log "changed", filePath
@@ -75,6 +77,15 @@ addCreatedFile = (filePath, action) ->
 			if fs.lstatSync(fileName).isFile()
 				changedFiles[fileName] = action
 
+addRemovedFile = (filePath, action) ->
+	if paths.extname(filePath) is ''
+		changedFiles[filePath] = action
+		onChange(changedFiles)
+	else
+		if !util.fileAlreadyAdded(changedFiles, filePath, action)
+			changedFiles[filePath] = action
+			onChange(changedFiles)
+
 exports.createRequestMessage = (changedFiles) ->
 	messages = []
 	for path in Object.keys changedFiles
@@ -83,20 +94,12 @@ exports.createRequestMessage = (changedFiles) ->
 
 createJsonForRequest = (path, changedFiles) ->
 	action: changedFiles[path]
-	path: formatPath path
+	path: util.formatPath path
 	contentType: mime.lookup path
-	content: getFileContentBase64 path
+	content: util.getFileContentBase64 path
 
 cleanChangedFiles = ->
 	changedFiles = Object.create null
-
-getFileContentBase64 = (path) ->
-	if fs.lstatSync(path).isFile()
-		content = fs.readFileSync(path, 'utf8')
-		return new Buffer(content || '').toString('base64')
-
-formatPath = (file) ->
-	return file.replace /\\/g,"\/"
 
 exports.sync = ->
 	credentials = auth.getCredentials()
