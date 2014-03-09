@@ -1,4 +1,3 @@
-pkg = require '../package.json'
 globule = require 'globule'
 request = require 'request'
 watch = require 'watch'
@@ -104,17 +103,17 @@ cleanChangedFiles = ->
 exports.sync = ->
 	credentials = auth.getCredentials()
 
-	root = paths.dirname(pkg.parameters.root)
+	root = util.getOptionsFile().root
 
 	changedFiles[root] = 'removed'
 	cleanBucketPromise = onChange(changedFiles)
 
 	cleanBucketPromise.then (onChangeReturn) ->
-		root = pkg.parameters.root
+		root = util.getOptionsFile().root
 		syncPromise = syncFilesToS3 root
 
-		syncPromise.then (syncReturn, root) ->
-			root = paths.dirname(pkg.parameters.root)
+		syncPromise.then (syncReturn) ->
+			root = paths.dirname(util.getOptionsFile().root)
 			console.log "watching files...".green
 			watchFiles(root)
 
