@@ -53,26 +53,30 @@ syncFilesToS3 = (root) ->
 watchFiles = (path) ->
 	watch.createMonitor path, (monitor) ->
 		monitor.on 'created', (filePath) ->
-			console.log "created ", filePath
-			addCreatedFile filePath, 'created'
-			onChange changedFiles
+			if !util.shouldIgnore filePath
+				console.log "created ", filePath
+				_this.addCreatedFile filePath, 'created'
+				onChange changedFiles
 
 		monitor.on 'removed', (filePath) ->
-			console.log "removed ", filePath
-			addRemovedFile filePath, 'removed'
+			if !util.shouldIgnore filePath
+				console.log "removed ", filePath
+				addRemovedFile filePath, 'removed'
 
 		monitor.on 'changed', (filePath) ->
-			console.log "changed", filePath
-			changedFiles[filePath] = 'changed'
-			onChange changedFiles
+			if !util.shouldIgnore filePath
+				console.log "changed", filePath
+				changedFiles[filePath] = 'changed'
+				onChange changedFiles
 
-addCreatedFile = (filePath, action) ->
+exports.addCreatedFile = (filePath, action) ->
 	if fs.lstatSync(filePath).isFile()
 		changedFiles[filePath] = action
 
 	if fs.lstatSync(filePath).isDirectory()
 		for file in fs.readdirSync filePath
 			fileName = filePath + "\\" + file
+
 			if fs.lstatSync(fileName).isFile()
 				changedFiles[fileName] = action
 

@@ -1,8 +1,11 @@
 require 'shelljs/global'
 defaultOptions = require './default_options'
 extend = require 'node.extend'
+globToRegExp = require 'glob-to-regexp'
 paths = require 'path'
 yaml = require 'js-yaml'
+
+_this = this
 
 getPatternFrom = (key) ->
 	key = key.replace /\\/g, "\\/\\"
@@ -47,3 +50,10 @@ exports.getFileContentBase64 = (path) ->
 
 exports.formatPath = (file) ->
 	return file.replace /\\/g,"\/"
+
+exports.shouldIgnore = (file) ->
+	opts = _this.getOptionsFile()
+	for opts in opts.ignore
+		regex = globToRegExp(opts)
+		return true if regex.test _this.formatPath(file)
+	return false

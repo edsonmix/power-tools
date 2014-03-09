@@ -3,6 +3,7 @@ assert = require 'assert'
 aux = require './test'
 
 describe "when add a removed file to changedFiles", ->
+
  it "should return true if root folder already added", ->
 	#Arrange
 	changedFiles = {}
@@ -67,3 +68,35 @@ describe "when getOptionsFile ", ->
 		#Assert
 		assert.equal 'root/**', config.root
 		assert.equal 0, config.ignore.length
+
+describe "when add file to changedFiles", ->
+	afterEach ->
+		aux.deleteFile '_powertool.yml'
+
+	it "should return true if matches to ignore files", ->
+		#Arrange
+		yml =
+		"""
+		ignore: ['some/path/*.txt']
+		"""
+		aux.createFile '_powertool.yml', yml
+
+		#Act
+		result = util.shouldIgnore 'some/path/to/file.txt'
+
+		#Assert
+		assert.equal true, result
+
+	it "should return false if don't matches to ignore files", ->
+		#Arrange
+		yml =
+		"""
+		ignore: ['some/path/*.txt']
+		"""
+		aux.createFile '_powertool.yml', yml
+
+		#Act
+		result = util.shouldIgnore 'file.txt'
+
+		#Assert
+		assert.equal false, result
