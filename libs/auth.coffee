@@ -90,8 +90,8 @@ getCredentialsPath = ->
 
 exports.getCredentials = ->
 	path = paths.join(getCredentialsPath(), 'data.json')
-	if !fs.existsSync(path)
-		throw new Error('Authentication failed. Call \'vtex login\'')
+	unless fs.existsSync(path)
+		throw 'Authentication failed. Call \'vtex login\''
 
 	content = fs.readFileSync(path, 'utf8')
 	return JSON.parse content
@@ -107,7 +107,7 @@ exports.userAndPassword = ->
 				throw new Error(msg) if response.authStatus isnt 'Success'
 
 				response.userId = credentials.login
-				response.accountId = credentials.account
+				response.accountName = credentials.account
 
 				path = paths.join(getCredentialsPath(), 'data.json')
 				fs.writeFile path, JSON.stringify(response, null, 4)

@@ -57,3 +57,17 @@ exports.shouldIgnore = (file) ->
 		regex = globToRegExp(opts)
 		return true if regex.test _this.formatPath(file)
 	return false
+
+exports.createFile = (filename, data) ->
+	path = _this.getAbsoluteFilePath filename
+	dirname = paths.dirname path
+	mkdir dirname if !test '-e', dirname
+	data.to path
+
+exports.deleteFile = (filename) ->
+	path = _this.getAbsoluteFilePath filename
+	rm '-rf', path if test '-e', path
+
+exports.getAbsoluteFilePath = (filename) ->
+	dir = paths.resolve module.filename, '../../'
+	return paths.join dir, filename

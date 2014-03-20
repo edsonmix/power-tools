@@ -6,9 +6,10 @@ program.version pkg.version
 	.usage 'COMMAND [options]'
 	.option '-l, login', 'authenticate user'
 	.option '-p, preview', 'preview application'
+	.option '-s, session <command>', 'call \'session help\' for more information'
 	.parse process.argv
 
 try
 	return new PowerTool program
 catch error
-	console.error error.message.red
+	console.log error.red
