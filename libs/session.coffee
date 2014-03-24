@@ -29,7 +29,6 @@ start = (name) ->
 
 	return deferred.promise
 
-listSessions = ->
 	metadata = _this.getSessions()
 	if metadata.current != null
 		console.log metadata.current + " << current".green
@@ -44,6 +43,10 @@ join = (name) ->
 
 	if name not in metadata.sessions
 		throw "Session \'#{name}\' not found. Call \'vtex session start\'"
+
+	metadata.current = name
+	_this.saveSessions metadata
+	console.log "joined on session \'#{name}\'".green
 
 exports.saveSessions = (metadata) ->
 	sessions = createSessions metadata
@@ -82,6 +85,11 @@ exports.getSessions = ->
 	content = cat path
 	return JSON.parse content
 
+exports.getCurrentSession = ->
+	metadata = _this.getSessions()
+	throw "No session found. Call\'vtex session join <name>\'" if metadata.current is null
+	return metadata.current
+
 exports.init = (command, args) ->
 	switch
 		when command is 'start'
@@ -94,5 +102,9 @@ exports.init = (command, args) ->
 
 		when command is 'list'
 			listSessions()
+
+		when command is 'join'
+			throw '\'join\' requires a session name' unless args.length
+			join(args[0])
 
 		else console.log 'command not found. Use vtex session --help'.green

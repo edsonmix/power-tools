@@ -4,6 +4,7 @@ watch = require 'watch'
 util = require './util'
 auth = require './auth'
 paths = require 'path'
+session = require './session'
 mime = require 'mime'
 fs = require 'fs'
 Q = require 'q'
@@ -22,8 +23,9 @@ onChange = (changedFiles) ->
 		json: requestMessage
 		headers:
 			'cookie': credentials.authCookie.Value
-			'accountId': credentials.accountId
-			'userId': credentials.userId
+			'vtex-account-id': credentials.accountId
+			'vtex-user-id': credentials.userId
+			'vtex-session-id': session.getCurrentSession()
 
 	requestCallBack = (error, response, body) ->
 		throw error if error
