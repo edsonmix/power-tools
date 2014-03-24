@@ -29,6 +29,22 @@ start = (name) ->
 
 	return deferred.promise
 
+listSessions = ->
+	metadata = _this.getSessions()
+	if metadata.current != null
+		console.log metadata.current + " << current".green
+
+	for session in metadata.sessions
+		if session != metadata.current
+			console.log session
+join = (name) ->
+	metadata = _this.getSessions()
+	if metadata.current is name
+		throw "Already on \'#{metadata.current}\'"
+
+	if name not in metadata.sessions
+		throw "Session \'#{name}\' not found. Call \'vtex session start\'"
+
 exports.saveSessions = (metadata) ->
 	sessions = createSessions metadata
 	path = util.getAbsoluteFilePath 'sessions/meta.json'
@@ -75,5 +91,8 @@ exports.init = (command, args) ->
 				console.log "Session was created."
 			.fail (reason) ->
 				console.log reason.red
+
+		when command is 'list'
+			listSessions()
 
 		else console.log 'command not found. Use vtex session --help'.green
