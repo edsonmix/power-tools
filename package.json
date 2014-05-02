@@ -1,0 +1,11 @@
+{
+  "name": "vtex",
+  "version": "0.0.0",
+  "dependencies": {
+    "signalr-client": "0.0.5",
+    "commander": "~2.2.0",
+    "prompt": "~0.2.12",
+    "q": "~1.0.1",
+    "request": "~2.34.0"
+  }
+}
