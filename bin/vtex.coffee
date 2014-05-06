@@ -1,6 +1,7 @@
 program = require 'commander'
 pkg = require.main.require '../package.json'
 auth = require '../lib/auth.coffee'
+sync = require '../lib/sync.coffee'
 
 program.version pkg.version
   .usage '[command] [options]'
@@ -11,6 +12,7 @@ program.command 'sync <account> <session>'
     console.log "Starting sync to account #{accountName.cyan} and session #{session.cyan}"
     auth.getUser(accountName).then (user) ->
       console.log "Logged in as #{user.login.cyan}"
+      sync.start accountName, session, user
     .fail (reason) ->
       console.log "Authentication failed: #{reason}".red
 
